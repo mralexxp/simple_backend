@@ -1,7 +1,8 @@
 APP_NAME=homemeshnet
 BUILD_PATH=./build
-TARGET=linux_amd64
-REMOTE_PATH=/tmp
+GOOS=linux
+GOARCH=amd64
+REMOTE_PATH=/app
 
 # Получение IP из аргумента или переменной окружения:
 # make deploy RUN_IP=192.168.1.2
@@ -10,7 +11,7 @@ REMOTE_PATH=/tmp
 
 build:
 	mkdir -p $(BUILD_PATH)
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o $(BUILD_PATH)/$(APP_NAME) .
+	CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(GOARCH) go build -o $(BUILD_PATH)/$(APP_NAME) .
 
 clean:
 	rm -rf $(BUILD_PATH)
@@ -19,6 +20,7 @@ deploy:
 ifndef RUN_IP
 	$(error RUN_IP is not set. Use: make deploy RUN_IP=192.168.1.2)
 endif
+	ssh root@$(RUN_IP) 'mkdir $(REMOTE_PATH)'
 	scp -O $(BUILD_PATH)/$(APP_NAME) root@$(RUN_IP):$(REMOTE_PATH)/
 
 run:
